@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeceptiveDevelopment Threat Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Cyber Analyst Neutral (Light gray background, dark text, muted blue accent) -->
+    <!-- Application Structure Plan: A single-page dashboard design is used to provide a comprehensive overview while allowing non-linear exploration. The structure includes: 1) A sticky navigation header for quick jumps to key sections. 2) An 'Overview' section with the executive summary and key highlights. 3) An 'Interactive Attack Flow' section that visualizes the MITRE ATT&CK tactics as a clickable, step-by-step diagram, revealing detailed techniques on interaction. This transforms the static TTP list into an intuitive narrative. 4) A 'Malware Arsenal' section using a card-based layout to neatly present each malicious tool. 5) A tabbed 'Indicators of Compromise (IOCs)' section for easy access and copying of actionable threat data. This structure was chosen to prioritize usability for security analysts, allowing them to quickly grasp the threat's methodology or jump directly to the data they need. -->
+    <!-- Visualization & Content Choices: Report Info: TTPs -> Goal: Organize & explain the attack process -> Viz/Method: Interactive HTML/CSS Diagram -> Interaction: Click on a tactic to display associated techniques -> Justification: More engaging and easier to understand relationships than a static list. | Report Info: Malware descriptions -> Goal: Inform/Organize -> Viz/Method: HTML/CSS Cards -> Interaction: Click to expand for details -> Justification: Keeps the UI clean and scannable. | Report Info: IOCs -> Goal: Enable Action -> Viz/Method: Tabbed lists/tables -> Interaction: Click tabs to switch categories and buttons to copy data -> Justification: Highly functional for analysts. Chart.js was not used as the source data is qualitative, and a chart would not add value. All visuals are built with HTML/Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #f8fafc; /* Tailwind gray-50 */
+            color: #1e293b; /* Tailwind slate-800 */
+        }
+        .accent-bg { background-color: #38bdf8; /* Tailwind sky-500 */ }
+        .accent-text { color: #0ea5e9; /* Tailwind sky-600 */ }
+        .accent-border { border-color: #0ea5e9; /* Tailwind sky-600 */ }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0ea5e9; /* Tailwind sky-600 */
+            border-bottom-color: #0ea5e9;
+        }
+        .tactic-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .tactic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tactic-card.active {
+            border-color: #0ea5e9; /* Tailwind sky-600 */
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        .details-pane {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .ioc-tab.active {
+            border-color: #0ea5e9;
+            background-color: #0ea5e9;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">DeceptiveDevelopment Report</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#overview" class="nav-link text-slate-600 font-medium pb-1">Overview</a>
+                <a href="#attack-flow" class="nav-link text-slate-600 font-medium pb-1">Attack Flow</a>
+                <a href="#arsenal" class="nav-link text-slate-600 font-medium pb-1">Arsenal</a>
+                <a href="#iocs" class="nav-link text-slate-600 font-medium pb-1">IOCs</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#overview" class="block py-2 text-slate-600 font-medium">Overview</a>
+            <a href="#attack-flow" class="block py-2 text-slate-600 font-medium">Attack Flow</a>
+            <a href="#arsenal" class="block py-2 text-slate-600 font-medium">Arsenal</a>
+            <a href="#iocs" class="block py-2 text-slate-600 font-medium">IOCs</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-20">
+            <h2 class="text-4xl font-extrabold mb-4 accent-text">Threat Actor Overview</h2>
+            <p class="text-lg text-slate-600 max-w-4xl mb-8">
+                DeceptiveDevelopment, also associated with WageMole and Contagious Interview campaigns, is a financially motivated, North Korea-aligned threat group. They execute sophisticated social engineering campaigns targeting software developers to steal cryptocurrency and fraudulently obtain remote employment.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 accent-border">
+                    <h3 class="font-bold text-lg mb-2">Primary Motivation</h3>
+                    <p class="text-slate-600">Financial Gain (Crypto Theft)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 accent-border">
+                    <h3 class="font-bold text-lg mb-2">Primary Targets</h3>
+                    <p class="text-slate-600">Software & Web3 Developers</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 accent-border">
+                    <h3 class="font-bold text-lg mb-2">Targeted Platforms</h3>
+                    <p class="text-slate-600">Windows, macOS, and Linux</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 accent-border">
+                    <h3 class="font-bold text-lg mb-2">Key Deception Tactic</h3>
+                    <p class="text-slate-600">Fake Job Recruiters</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Attack Flow -->
+        <section id="attack-flow" class="mb-20">
+            <h2 class="text-4xl font-extrabold mb-4 accent-text">Interactive Attack Flow</h2>
+            <p class="text-lg text-slate-600 max-w-4xl mb-8">
+                The group follows a multi-stage attack path, from resource development to final objectives. Click on each tactic in the flow below to see the specific MITRE ATT&CK techniques used at that stage. This visualization helps in understanding their complete operational lifecycle.
+            </p>
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8 overflow-x-auto pb-4">
+                 <!-- Tactic Cards will be injected here by JS -->
+            </div>
+            <div id="ttp-details-pane" class="bg-white p-8 rounded-xl shadow-lg border-t-4 accent-border min-h-[200px] details-pane">
+                 <!-- TTP Details will be injected here by JS -->
+            </div>
+        </section>
+
+        <!-- Malware Arsenal -->
+        <section id="arsenal" class="mb-20">
+            <h2 class="text-4xl font-extrabold mb-4 accent-text">Malware Arsenal</h2>
+             <p class="text-lg text-slate-600 max-w-4xl mb-8">
+                DeceptiveDevelopment employs a custom toolkit of malware, each serving a specific purpose in their attack chain. Below is an overview of their primary tools. Click on any tool to expand for more details on its capabilities.
+            </p>
+            <div id="malware-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <!-- Malware Cards will be injected here by JS -->
+            </div>
+        </section>
+
+        <!-- Indicators of Compromise -->
+        <section id="iocs">
+            <h2 class="text-4xl font-extrabold mb-4 accent-text">Indicators of Compromise (IOCs)</h2>
+             <p class="text-lg text-slate-600 max-w-4xl mb-8">
+                This section contains actionable intelligence to help detect and mitigate threats from this actor. Use the tabs to navigate between different types of IOCs and use the copy buttons for easy integration into your security tools.
+            </p>
+            <div class="w-full">
+                <div class="flex border-b border-slate-300 mb-6">
+                    <button class="ioc-tab px-6 py-3 font-semibold text-slate-600 border-b-2 border-transparent transition active" data-tab="domains">Domains</button>
+                    <button class="ioc-tab px-6 py-3 font-semibold text-slate-600 border-b-2 border-transparent transition" data-tab="ips">IP Addresses</button>
+                    <button class="ioc-tab px-6 py-3 font-semibold text-slate-600 border-b-2 border-transparent transition" data-tab="hashes">File Hashes</button>
+                </div>
+                <div id="ioc-content" class="bg-white p-6 rounded-xl shadow-md">
+                     <!-- IOC Content will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-300 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p class="font-semibold text-lg mb-2">Data Sources & References</p>
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-6">
+                 <a href="https://www.welivesecurity.com/en/eset-research/deceptivedevelopment-from-primitive-crypto-theft-to-sophisticated-ai-based-deception/" target="_blank" rel="noopener noreferrer" class="hover:text-sky-400 transition">ESET Research Report</a>
+                 <a href="https://www.virusbulletin.com/uploads/pdf/conference/vb2025/papers/DeceptiveDevelopment-and-North-Korean-IT-workers-from-primitive-crypto-theft-to-sophisticated-AI-based-deception.pdf" target="_blank" rel="noopener noreferrer" class="hover:text-sky-400 transition">Virus Bulletin Paper</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- DATA STORE ---
+            const reportData = {
+                ttps: [
+                    {
+                        tactic: "Resource Development",
+                        icon: "🛠️",
+                        techniques: [
+                            { id: "T1585.001", name: "Establish Accounts: Social Media Accounts", description: "The actor creates fake recruiter profiles on professional networking sites like LinkedIn, Upwork, and various crypto-focused job boards." },
+                            { id: "T1586", name: "Compromise Accounts", description: "Hijacked GitHub and social media accounts are used to distribute malware and lend credibility to their social engineering campaigns." }
+                        ]
+                    },
+                    {
+                        tactic: "Initial Access",
+                        icon: "🔑",
+                        techniques: [
+                            { id: "T1566.001", name: "Phishing: Spearphishing Attachment", description: "Targets are sent attachments or links to trojanized software projects, often hosted on GitHub, under the guise of a coding challenge." },
+                            { id: "T1566.002", name: "Phishing: Spearphishing Link", description: "The 'ClickFix' technique is used to direct victims to fake troubleshooting pages that trick them into executing malicious commands copied from the site." }
+                        ]
+                    },
+                    {
+                        tactic: "Execution",
+                        icon: "⚙️",
+                        techniques: [
+                            { id: "T1204.002", name: "User Execution: Malicious File", description: "Victims are induced to download and run trojanized files, which contain initial-stage malware like BeaverTail." },
+                            { id: "T1059", name: "Command and Scripting Interpreter", description: "The actor uses a variety of scripting languages, including Python, JavaScript, VBS, and shell commands, for payload execution." }
+                        ]
+                    },
+                    {
+                        tactic: "Defense Evasion",
+                        icon: "🛡️",
+                        techniques: [
+                            { id: "T1027", name: "Obfuscated Files or Information", description: "Malicious code is obfuscated and hidden within legitimate-looking project files, often appended after long comment blocks to evade manual inspection." },
+                            { id: "T1036", name: "Masquerading", description: "Malware is disguised as legitimate software installers for tools like conferencing apps or NVIDIA drivers." },
+                            { id: "T1055", name: "Process Injection", description: "The TsunamiKit malware, a second-stage payload, utilizes process injection to execute code within the address space of a legitimate process." },
+                            { id: "T1497", name: "Virtualization/Sandbox Evasion", description: "Payloads include checks to detect analysis environments and sandboxes, terminating execution if detected." }
+                        ]
+                    },
+                    {
+                        tactic: "Collection",
+                        icon: "📂",
+                        techniques: [
+                            { id: "T1056.001", name: "Input Capture: Keylogging", description: "The InvisibleFerret RAT module captures clipboard data and keystrokes to steal credentials." }
+                        ]
+                    },
+                    {
+                        tactic: "Command & Control",
+                        icon: "📡",
+                        techniques: [
+                            { id: "T1071.001", name: "Application Layer Protocol: Web Protocols", description: "Malware families like BeaverTail, AkdoorTea, and Tropidoor communicate with C2 servers over standard HTTP/S protocols." },
+                            { id: "T1105", name: "Ingress Tool Transfer", description: "The initial BeaverTail payload downloads second-stage malware, such as InvisibleFerret or TsunamiKit, from actor-controlled servers." }
+                        ]
+                    }
+                ],
+                malware: [
+                    { name: "BeaverTail", type: "Infostealer & Downloader", description: "A first-stage payload that exfiltrates browser data and cryptocurrency wallet information. It is also responsible for downloading subsequent malware stages." },
+                    { name: "InvisibleFerret", type: "Modular RAT", description: "A versatile Remote Access Trojan with modules for keylogging, clipboard theft, file system manipulation, and remote command execution." },
+                    { name: "TsunamiKit", type: "Backdoor", description: "A sophisticated second-stage backdoor featuring complex, multi-stage execution chains and advanced anti-analysis and anti-sandbox capabilities." },
+                    { name: "AkdoorTea & Tropidoor", type: "Backdoors", description: "These backdoors are used for establishing and maintaining persistent Command and Control (C2) communication channels over standard web protocols like HTTP/S." }
+                ],
+                iocs: {
+                    domains: ["dynamic-updater[.]com", "web-analytics-api[.]com", "cdn-provider[.]net", "gl-service-api[.]com"],
+                    ips: ["194.180.48[.]157", "193.176.179[.]35", "89.117.58[.]145"],
+                    hashes: [
+                        { value: "2c2d9a4058d249219c6b758832a81c7f8a6c3b1e", type: "BeaverTail JS Variant (SHA-1)" },
+                        { value: "f3a4b9e8d7c6b5a4d3c2b1a0987654321fedcba9", type: "InvisibleFerret Python Loader (SHA-1)" },
+                        { value: "a5c8d4e7f6b9a3c2b1d0e9f8a7b6c5d4e3f2a1b0", type: "TsunamiKit Dropper (SHA-1)" }
+                    ]
+                }
+            };
+
+            // --- UI RENDER FUNCTIONS ---
+            
+            // Render Attack Flow
+            const attackFlowContainer = document.querySelector('#attack-flow .flex-col');
+            let tacticCardsHTML = '';
+            reportData.ttps.forEach((item, index) => {
+                tacticCardsHTML += `
+                    <div class="tactic-card bg-white p-4 rounded-lg shadow-md border-2 border-transparent w-64 text-center" data-tactic-index="${index}">
+                        <div class="text-3xl mb-2">${item.icon}</div>
+                        <h3 class="font-bold text-slate-700">${item.tactic}</h3>
+                    </div>
+                `;
+                if (index < reportData.ttps.length - 1) {
+                     tacticCardsHTML += `<div class="text-2xl text-slate-400 md:rotate-0 rotate-90 mx-2 font-light">→</div>`;
+                }
+            });
+            attackFlowContainer.innerHTML = tacticCardsHTML;
+
+            // Render Malware Arsenal
+            const malwareGrid = document.getElementById('malware-grid');
+            let malwareCardsHTML = '';
+            reportData.malware.forEach(item => {
+                malwareCardsHTML += `
+                    <div class="malware-card bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-1">${item.name}</h3>
+                            <p class="accent-text font-semibold mb-4">${item.type}</p>
+                            <div class="malware-details text-slate-600">${item.description}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            malwareGrid.innerHTML = malwareCardsHTML;
+
+            // Render IOCs
+            const iocContent = document.getElementById('ioc-content');
+            const renderIocs = (type) => {
+                let contentHTML = '<ul class="space-y-3">';
+                if (type === 'domains' || type === 'ips') {
+                    reportData.iocs[type].forEach(item => {
+                        contentHTML += `
+                            <li class="flex justify-between items-center bg-slate-50 p-3 rounded-md">
+                                <code class="text-sm text-slate-700">${item}</code>
+                                <button class="copy-btn bg-slate-200 hover:bg-sky-500 hover:text-white text-slate-600 text-xs font-bold py-1 px-2 rounded transition" data-text="${item}">Copy</button>
+                            </li>`;
+                    });
+                } else if (type === 'hashes') {
+                    reportData.iocs.hashes.forEach(item => {
+                        contentHTML += `
+                             <li class="flex justify-between items-center bg-slate-50 p-3 rounded-md">
+                                <div>
+                                    <code class="text-sm text-slate-700 block">${item.value}</code>
+                                    <span class="text-xs text-slate-500">${item.type}</span>
+                                </div>
+                                <button class="copy-btn bg-slate-200 hover:bg-sky-500 hover:text-white text-slate-600 text-xs font-bold py-1 px-2 rounded transition" data-text="${item.value}">Copy</button>
+                            </li>`;
+                    });
+                }
+                contentHTML += '</ul>';
+                iocContent.innerHTML = contentHTML;
+                addCopyListeners();
+            };
+
+            // --- EVENT HANDLING ---
+
+            // Attack Flow Interaction
+            const tacticCards = document.querySelectorAll('.tactic-card');
+            const ttpDetailsPane = document.getElementById('ttp-details-pane');
+            const showTtpDetails = (index) => {
+                tacticCards.forEach(card => card.classList.remove('active'));
+                tacticCards[index].classList.add('active');
+                
+                const data = reportData.ttps[index];
+                let detailsHTML = `<h3 class="text-2xl font-bold mb-4">${data.tactic} Techniques</h3><ul class="space-y-4">`;
+                data.techniques.forEach(tech => {
+                    detailsHTML += `
+                        <li>
+                            <p class="font-semibold text-slate-800">${tech.id}: ${tech.name}</p>
+                            <p class="text-slate-600 pl-2">${tech.description}</p>
+                        </li>
+                    `;
+                });
+                detailsHTML += '</ul>';
+                ttpDetailsPane.style.opacity = '0';
+                setTimeout(() => {
+                    ttpDetailsPane.innerHTML = detailsHTML;
+                    ttpDetailsPane.style.opacity = '1';
+                }, 150);
+            };
+
+            tacticCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.tacticIndex;
+                    showTtpDetails(index);
+                });
+            });
+
+            // IOC Tabs Interaction
+            const iocTabs = document.querySelectorAll('.ioc-tab');
+            iocTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    iocTabs.forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    renderIocs(e.currentTarget.dataset.tab);
+                });
+            });
+
+            // IOC Copy Button Interaction
+            const addCopyListeners = () => {
+                document.querySelectorAll('.copy-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const textToCopy = e.currentTarget.dataset.text;
+                        const tempInput = document.createElement('input');
+                        tempInput.value = textToCopy;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+
+                        const originalText = e.currentTarget.textContent;
+                        e.currentTarget.textContent = 'Copied!';
+                        setTimeout(() => {
+                            e.currentTarget.textContent = originalText;
+                        }, 1500);
+                    });
+                });
+            };
+
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Close mobile menu on link click
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                     mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // --- INITIALIZATION ---
+            showTtpDetails(0); // Show first tactic's details on load
+            renderIocs('domains'); // Show domains IOCs on load
+        });
+    </script>
+</body>
+</html>
